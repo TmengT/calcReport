@@ -1,0 +1,65 @@
+Private Sub CommandButton1_Click()
+    Rem MsgBox (Sheet1.Columns().Count)
+    Dim i As String
+    i = Sheet2.Cells(1, 1)
+    Rem MsgBox (Cells(1, 2))
+    
+    Rem 获取行数
+    Rem MsgBox (Sheet2.UsedRange.Rows.Count)
+    
+    Rem 我的订单 ，实际到货单
+    Dim MyOrder, arriOrder
+    Set MyOrder = CreateObject("scripting.dictionary")
+    Set arriOrder = CreateObject("scripting.dictionary")
+
+    Rem 订单去重加载到内存字典
+    With MyOrder  
+        
+        For pos = 2 To Sheets(1).UsedRange.Rows.Count        
+            Rem 获取型号
+            orderModel = Sheets(1).Cells(pos, 1).Value
+            orderNum = Sheets(1).Cells(pos, 2).Value
+        
+            If .Exists(orderModel) Then
+            
+                .Item(orderModel) = .Item(orderModel) + orderNum
+            Else
+                .Add orderModel, orderNum
+            End If
+        Next pos
+    
+    End With
+
+    Rem 订单去重加载到内存字典
+    With arriOrder
+        
+        For pos = 2 To Sheets(2).UsedRange.Rows.Count         
+            Rem 获取型号
+            model = Sheets(2).Cells(pos, 1).Value
+            
+            num = Sheets(2).Cells(pos, 2).Value
+        
+            If .Exists(model) Then
+            
+                .Item(model) = .Item(model) + num
+            Else
+                .Add model, num
+            End If
+            
+        Next pos
+    
+    End With
+    
+    myKeys = MyOrder.Keys
+    myItems = MyOrder.items
+    arriItems = arriOrder.items    
+    Rem 订单 作差计算
+    For pos = 0 To MyOrder.Count - 1        
+        Keyname = myKeys(pos)
+        Sheets(3).Cells(pos + 2, 1) = Keyname
+        Sheets(3).Cells(pos + 2, 2) = myItems(pos)
+        Sheets(3).Cells(pos + 2, 3) = arriOrder.Item(Keyname)
+        Sheets(3).Cells(pos + 2, 4) = myItems(pos) - arriOrder.Item(Keyname)    
+    Next pos
+    
+End Sub
